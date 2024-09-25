@@ -14,7 +14,7 @@ void init_editor() {
 void draw_line_numbers(Editor* editor) {
     attron(A_REVERSE);
     for(int y = 1; y < LINES; y++) {
-        if(y <= editor->page->numlines) {
+        if(y <= editor->file->numlines) {
             mvprintw(y, 0, "%4d ", y + editor->y_offset);
         } else {
             mvprintw(y, 0, "     ");
@@ -60,14 +60,14 @@ void move_right(Editor* editor) {
 }
 
 void move_down(Editor* editor) {
-        if(editor->cury < LINES - 1 && editor->cury < editor->page->numlines) {
+        if(editor->cury < LINES - 1 && editor->cury < editor->file->numlines) {
             editor->cury++;
-        } else if(editor->cury + editor->y_offset < editor->page->numlines - 1) {
+        } else if(editor->cury + editor->y_offset < editor->file->numlines - 1) {
             editor->y_offset++;
         }
 
-        if(editor->curx > strlen(editor->page->text[editor->cury + editor->y_offset].line) + 1) {
-            editor->curx = strlen(editor->page->text[editor->cury + editor->y_offset].line) + 1;
+        if(editor->curx > strlen(editor->file->text[editor->cury + editor->y_offset].line) + 1) {
+            editor->curx = strlen(editor->file->text[editor->cury + editor->y_offset].line) + 1;
         }
 }
 
@@ -77,8 +77,8 @@ void move_up(Editor* editor) {
         } else if (editor->y_offset > 0) {
             editor->y_offset--;
         }
-        if(editor->curx > strlen(editor->page->text[editor->cury + editor->y_offset].line + 1)) {
-            editor->curx = strlen(editor->page->text[editor->cury + editor->y_offset].line) + 1;
+        if(editor->curx > strlen(editor->file->text[editor->cury + editor->y_offset].line + 1)) {
+            editor->curx = strlen(editor->file->text[editor->cury + editor->y_offset].line) + 1;
         }
 }
 
@@ -113,7 +113,7 @@ void update_normal(Editor* editor) {
     }
 
     if(lastchar == 'G') {
-        editor->y_offset = editor->page->numlines - LINES;
+        editor->y_offset = editor->file->numlines - LINES;
         editor->cury = LINES;
         editor->curx = 5;
         move(editor->cury, editor->curx);
@@ -121,12 +121,12 @@ void update_normal(Editor* editor) {
     }
 
     if(lastchar == 'a' || lastchar == 127 || lastchar == KEY_BACKSPACE) {
-        if(strlen(editor->page->text[editor->cury + editor->y_offset].line) == 0) {
-            remove_line(editor->page, editor->cury + editor->y_offset);
+        if(strlen(editor->file->text[editor->cury + editor->y_offset].line) == 0) {
+            remove_line(editor->file, editor->cury + editor->y_offset);
         } else if(editor->curx > 1) {
-            // remove_char(editor->page->text[editor->cury + editor->y_offset], editor->curx - 2);
+            // remove_char(editor->file->text[editor->cury + editor->y_offset], editor->curx - 2);
         }
-        print_page(editor->page, 0 + editor->y_offset, LINES + editor->y_offset, editor->x_offset, editor->y_offset);
+        print_file(editor->file, 0 + editor->y_offset, LINES + editor->y_offset, editor->x_offset, editor->y_offset);
     }
 
 }
@@ -152,7 +152,7 @@ void update(Editor* editor) {
 void render(Editor* editor, Titlebar* titlebar) {
         render_titlebar(titlebar);
         draw_line_numbers(editor);
-        print_page(editor->page, 0 + editor->y_offset, LINES + editor->y_offset, editor->x_offset, editor->y_offset);
+        print_file(editor->file, 0 + editor->y_offset, LINES + editor->y_offset, editor->x_offset, editor->y_offset);
         move(editor->cury, editor->curx);
         refresh();
 }
@@ -167,7 +167,7 @@ int run_editor(Editor* editor) {
     titlebar->mode = editor->mode;
     titlebar->x = editor->curx;
     titlebar->y = editor->cury;
-    titlebar->loc = editor->page->numlines;
+    titlebar->loc = editor->file->numlines;
 
     while(editor->running) {
         render(editor, titlebar);

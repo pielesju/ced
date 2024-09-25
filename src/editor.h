@@ -9,7 +9,7 @@
 typedef struct {
     int mode; /* 0=NORMAL, 1=INSERT */
     char* filename;
-    PAGE* page;
+    CED_FILE* file;
     int curx;
     int cury;
     int x_offset;

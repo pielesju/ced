@@ -1,6 +1,6 @@
 #include "cedfile.h"
 
-void init_page(PAGE *p, char *filename, int size) {
+void init_file(CED_FILE *p, char *filename, int size) {
 	p->text = (LINE *)malloc(size * sizeof(LINE));
 
 	for(int i = 0; i < size; i++) {
@@ -12,7 +12,7 @@ void init_page(PAGE *p, char *filename, int size) {
 	p->size = size;
 }
 
-void dest_page(PAGE *p) {
+void dest_file(CED_FILE *p) {
 	for(int i = 0; i < p->numlines; i++) {
 		free(p->text[i].line); 
 	}
@@ -20,9 +20,9 @@ void dest_page(PAGE *p) {
 	free(p->text);
 }
 
-void insert_line(PAGE *p, int index) {	
+void insert_line(CED_FILE *p, int index) {	
 	if(p->numlines >= p->size) {
-        expand_page(p);
+        expand_file(p);
     }
 	
 	LINE newline;
@@ -37,7 +37,7 @@ void insert_line(PAGE *p, int index) {
 	(p->numlines)++;
 }
 
-void remove_line(PAGE *p, int index) {
+void remove_line(CED_FILE *p, int index) {
 	if( p->numlines > 1 ) {
 		free(p->text[index].line);
 	
@@ -49,7 +49,7 @@ void remove_line(PAGE *p, int index) {
 	}
 }
 
-void expand_page(PAGE *p) {
+void expand_file(CED_FILE *p) {
 	int newsize = p->size * 2;
 	LINE *newline = malloc(newsize * sizeof(LINE));
 	
@@ -65,7 +65,7 @@ void expand_page(PAGE *p) {
 	p->size = newsize;
 }
 
-void print_page(const PAGE *p, int start, int end, int x_offset, int y_offset) {
+void print_file(const CED_FILE *p, int start, int end, int x_offset, int y_offset) {
 	int line;
 	for(int i = start, line = 0; i < p->numlines && i < end; i++, line++) {
 		int start_pos = 5;

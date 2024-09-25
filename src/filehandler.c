@@ -13,17 +13,17 @@ int count_lines(FILE *fp)
 } // count_lines
 
 /* saving and loading */
-void load_file(PAGE *p, char *filename)
+void load_file(CED_FILE *p, char *filename)
 {
 	FILE *fp = fopen(filename, "r");
 	int size = count_lines(fp) * 2;
 	char ch = '\0';
 	int line;
 
-    if(size < PAGE_SIZE)
-        size = PAGE_SIZE;
+    if(size < CED_FILE_SIZE)
+        size = CED_FILE_SIZE;
 
-	init_page(p, filename, size);
+	init_file(p, filename, size);
 
     if(fp == NULL) // file doesn't exist yet. don't bother reading
     {
@@ -59,7 +59,7 @@ void load_file(PAGE *p, char *filename)
 
 } // load_file
 
-void save_file(PAGE *p)
+void save_file(CED_FILE *p)
 {
 	FILE *fp = fopen(p->filename, "w");
 	int line, col;
