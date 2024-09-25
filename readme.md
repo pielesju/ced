@@ -6,6 +6,13 @@ The CED (Code EDitor) is a vim like text editor written in c with ncurses
 ## Requirements
 
 ncurses
+How to install:
+```bash
+# gnu debian
+sudo apt-get install libncurses5-dev libncursesw5-dev
+# archlinux
+sudo pacman -S ncurses
+```
 
 ## Build
 
