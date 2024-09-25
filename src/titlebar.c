@@ -11,10 +11,10 @@ void render_titlebar(Titlebar* titlebar) {
         case 1: mvprintw(0, 1, "-INSERT-"); break;
     }
 
-    mvprintw(0, 19, titlebar->filename);                
+    mvprintw(0, 19, "%s", titlebar->filename);                
     mvprintw(0, COLS - 19, "%d", titlebar->loc);        
     mvprintw(0, COLS - 13, "%d%% %d:%d",                
-    titlebar->y - 1 / titlebar->loc * 100.0,
+    (int)(titlebar->y - 1 / titlebar->loc * 100.0),
     titlebar->x - 5, titlebar->y - 1);      
     attroff(A_REVERSE);   
 }
