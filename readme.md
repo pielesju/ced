@@ -1,7 +1,7 @@
 # ced
 The CED (Code EDitor) is a vim like text editor written in c with ncurses
 
-![demo screenshot 0](https://github.com/pielesju/ced/blob/master/screenshot0.png)
+![demo screenshot 0](https://github.com/pielesju/ced/blob/master/resources/screenshot0.png)
 
 ## Requirements
 
