@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
     Editor* editor = malloc(sizeof(Editor));
     editor->mode = 0; /* NORMAL mode */
-    editor->filename = "abc";
+    editor->filename = file->filename;
     editor->file = file;
     editor->curx = 5;
     editor->cury = 1;
