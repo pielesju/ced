@@ -36,9 +36,7 @@ void insert_char(LINE* s, char c, int index) {
 }  /* insert_char */
 
 void remove_char(LINE* s, int index) {
-        int i;
-        int len = strlen(s->line);
-        for (i = index; i < len; i++) {
+        for (int i = index; i < strlen(s->line); i++) {
             s->line[i] = s->line[i + 1];
         }
 }  /* remove_char */

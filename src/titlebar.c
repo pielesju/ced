@@ -16,25 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "titlebar.h"
+#include <string.h>
+#include <stdio.h>
 
 void render_titlebar(Titlebar* titlebar) {
-    attron(A_REVERSE);
-    for (int x = 0; x < COLS; x++) {
-        mvprintw(0, x, " ");
-    }
+    char output[titlebar->columns];
+
+    char *modetext;
 
     switch (titlebar->mode) {
-        case 0: mvprintw(0, 1, "-NORMAL-"); break;
-        case 1: mvprintw(0, 1, "-INSERT-"); break;
+        case 0: modetext = "-NORMAL-"; break;
+        case 1: modetext = "-INSERT-"; break;
     }
 
-    mvprintw(0, 19, "%s", titlebar->filename);
-    mvprintw(0, COLS - 19, "%d", titlebar->loc);
+    float percentread = (titlebar->loc > 0) ?
+                        (titlebar->y * 100.0f) / titlebar->loc :
+                        0.0f;
 
-    float percentread = ((titlebar->y * 1.0) / (titlebar->loc * 1.0)) * 100.0;
-
-    mvprintw(0, COLS - 13, "%d%% %d:%d",
-    (int)percentread,
-    titlebar->x - 4, titlebar->y);
-    attroff(A_REVERSE);
+    snprintf(output, sizeof(output), " %8s %20s %4d %3d%% %4d:%4d%*s",
+            modetext,
+            titlebar->filename,
+            titlebar->loc,
+            (int) percentread,
+            titlebar->y,
+            titlebar->x,
+            titlebar->columns, " ");
+            mvaddstr(0, 0, output);
 }

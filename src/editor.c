@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "editor.h"
+#include "cedfile.h"
 #include <unistd.h>
 #include <stdlib.h>
-#include "cedfile.h"
+#include <ctype.h>
 
 #define LINE_NUMBERS_EN 1
 #define LINE_NUMBERS_WIDTH 5
@@ -60,19 +61,24 @@ void init_editor() {
 }  /* init_editor */
 
 void draw_line_numbers(Editor* editor) {
-    attron(A_REVERSE);
-    for (int y = 1; y < LINES; y++) {
+    char block_buffer[LINES * 8];
+    block_buffer[0] = '\0';
+    char *buffer_ptr = block_buffer;
+
+    for (int y = TITLE_BAR_ENABLED; y < LINES; y++) {
+        char line_buffer[8];
         if (y < editor->file->numlines) {
-            mvprintw(y, 0, "%4d ", y + editor->y_offset);
+            buffer_ptr += sprintf(buffer_ptr, "%4d ", y + editor->y_offset);
         } else {
-            mvprintw(y, 0, "     ");
+            buffer_ptr += sprintf(buffer_ptr, "     ");
         }
-        if (COLS > 80 + (LINE_NUMBERS_EN * LINE_NUMBERS_WIDTH)) {  /* 80 column marker */
-            move(y, 80 + (LINE_NUMBERS_EN * LINE_NUMBERS_WIDTH));
-            printw(" ");
-        }
+
+        *buffer_ptr++ = '\n';
     }
-    attroff(A_REVERSE);
+
+    *buffer_ptr = '\0';
+
+    mvaddstr(TITLE_BAR_ENABLED, 0, block_buffer);
 }  /* draw_line_numbers */
 
 void quit(Editor* editor) {
@@ -80,18 +86,53 @@ void quit(Editor* editor) {
 }
 
 void handle_command(Editor* editor) {
-    printw("%d", LINES);
     attron(A_REVERSE);
-    mvprintw(LINES, 5, "%20s", " ");
-    printw(":");
+
+    int x = LINE_NUMBERS_WIDTH; /* start cursor x position */
+
+    mvprintw(LINES - 1, x, "%*s", COLS, " "); /* add negative line */
+    mvaddstr(LINES - 1, x, ":"); /* add command start */
+
     int ch = getch();
-    while (ch != 'q') { ch = getch(); }
-        move(LINES, 6);
-        printw("q");
+    /*while (ch != 'q') { ch = getch(); }
+        mvaddstr(LINES - 1, 6, "q");
         int ch2 = getch();
         while (ch2 != KEY_ENTER && ch2 != '\n') { ch2 = getch(); }
+        quit(editor);*/
+
+    char command_buffer[256];
+    int buffer_index = 0;
+
+    while (ch != KEY_ENTER && ch != '\n') {
+        ch = getch();
+        /* exit command mode when pressing ESC */
+        if (ch == 27) {
+            clrtoeol();
+            return;
+        }
+
+        if (isprint(ch) && buffer_index < sizeof(command_buffer) - 1) {
+            command_buffer[buffer_index++] = ch;
+            command_buffer[buffer_index] = '\0';
+
+            mvprintw(LINES - 1, x + 1 + buffer_index, "%c", ch);
+            refresh();
+        }
+    }
+
+    if (strcmp(command_buffer, "q") == 0) {
         quit(editor);
-        attroff(A_REVERSE);
+    } else {
+        mvprintw(LINES - 1, LINE_NUMBERS_WIDTH,
+                 "Command Not Found: %s", command_buffer);
+        ch = getch();
+        if (ch == 27) {
+            clrtoeol();
+            return;
+        }
+    }
+
+    attroff(A_REVERSE);
 }  /* handle_command */
 
 void move_left(Editor* editor) {
@@ -213,17 +254,33 @@ void update(Editor* editor) {
 }  /* update */
 
 void render(Editor* editor) {
-        render_titlebar(editor->titlebar);
-        
-        if(LINE_NUMBERS_EN) {
+        static int last_x_offset = -1;
+        static int last_y_offset = -1;
+        static int last_mode = -1;
+
+        if (last_y_offset != editor->y_offset ||
+            last_x_offset != editor->x_offset ||
+            last_mode     != editor-> mode) {
+            attron(A_REVERSE);
+            editor->titlebar->columns = COLS;
+            render_titlebar(editor->titlebar);
+
+        if (LINE_NUMBERS_EN) {
             draw_line_numbers(editor);
         }
+
+        attroff(A_REVERSE);
 
         int start = editor->y_offset;
         int end = LINES + editor->y_offset;
         int x_offset = editor->x_offset;
         int y_offset = editor->y_offset;
         print_file(editor->file, start, end, x_offset, y_offset);
+
+        last_y_offset = editor->y_offset;
+        last_x_offset = editor->x_offset;
+        last_mode = editor->mode;
+        }
         move(editor->cury, editor->curx);
         refresh();
 }  /* render */

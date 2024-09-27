@@ -26,6 +26,7 @@ typedef struct {
     int x;
     int y;
     int loc;
+    int columns;
 } Titlebar;
 
 void render_titlebar(Titlebar* titlebar);
