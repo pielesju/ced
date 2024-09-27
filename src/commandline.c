@@ -1,4 +1,4 @@
-/* editor.c
+/* commandline.c
  * CED - Code EDitor
  * Copyright (C) 2024 Julian Pieles
  *
