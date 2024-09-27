@@ -1,4 +1,4 @@
-/* cedline.h
+/* commandline.h
  * CED - Code EDitor
  * Copyright (C) 2024 Julian Pieles
  *
@@ -15,25 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_CEDLINE_H_
-#define SRC_CEDLINE_H_
+#ifndef SRC_COMMANDLINE_H_
+#define SRC_COMMANDLINE_H_
 
-#include <string.h>
-#include <stdlib.h>
+#include <ncurses.h>
+#include "./editor.h"
 
-#define LINE_SIZE 128
-#define TAB_WIDTH 4
+void handle_command(Editor* editor);
 
-typedef struct {
-    char* line;
-    int size;
-} LINE;
-
-void init_line(LINE* s);
-void insert_char(LINE* s, char c, int index);
-void remove_char(LINE* s, int index);
-void remove_word(LINE* s, int index);
-void expand(LINE* s);
-void add_char(LINE* s, char c);
-
-#endif  /* SRC_CEDLINE_H_ */
+#endif  /* SRC_COMMANDLINE_H_ */

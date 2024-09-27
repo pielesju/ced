@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "filehandler.h"
+#include "./filehandler.h"
 
 int count_lines(FILE* fp) {
     char ch = '\0';

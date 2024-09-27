@@ -27,19 +27,20 @@ void render_titlebar(Titlebar* titlebar) {
     switch (titlebar->mode) {
         case 0: modetext = "-NORMAL-"; break;
         case 1: modetext = "-INSERT-"; break;
+        case 2: modetext = "-COMMAND-"; break;
     }
 
     float percentread = (titlebar->loc > 0) ?
                         (titlebar->y * 100.0f) / titlebar->loc :
                         0.0f;
 
-    snprintf(output, sizeof(output), " %8s %20s %4d %3d%% %4d:%4d%*s",
+    snprintf(output, sizeof(output), " %9s %20s %4d %3d%% %4d:%4d%*s",
             modetext,
             titlebar->filename,
             titlebar->loc,
             (int) percentread,
             titlebar->y,
             titlebar->x,
-            titlebar->columns, " ");
+            titlebar->columns - 51, " ");
             mvaddstr(0, 0, output);
 }

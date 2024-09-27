@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "cedline.h"
+#include "./cedline.h"
 
 void init_line(LINE* s) {
     s->size = LINE_SIZE;
@@ -36,10 +36,18 @@ void insert_char(LINE* s, char c, int index) {
 }  /* insert_char */
 
 void remove_char(LINE* s, int index) {
-        for (int i = index; i < strlen(s->line); i++) {
-            s->line[i] = s->line[i + 1];
-        }
+    for (int i = index; i < strlen(s->line); i++) {
+        s->line[i] = s->line[i + 1];
+    }
 }  /* remove_char */
+
+void remove_word(LINE* s, int index) {
+    int i = index;
+    while(s->line[i] != ' ') {
+        remove_char(s, i);
+        i++;
+    }
+}  /* remove_word */
 
 void expand(LINE *s) {
     int new_size = s->size * 2;

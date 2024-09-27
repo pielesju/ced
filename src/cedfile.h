@@ -19,7 +19,7 @@
 #define SRC_CEDFILE_H_
 
 #include <ncurses.h>
-#include "cedline.h"
+#include "./cedline.h"
 
 #define CED_FILE_SIZE 1000
 #define NAME_LIMIT 256

@@ -18,7 +18,7 @@
 #ifndef SRC_FILEHANDLER_H_
 #define SRC_FILEHANDLER_H_
 
-#include "cedfile.h"
+#include "./cedfile.h"
 
 int count_lines(FILE* fp);
 void load_file(CED_FILE* p, char* filename);

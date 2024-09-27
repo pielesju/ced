@@ -15,8 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "editor.h"
-#include "cedfile.h"
+#include "./editor.h"
+#include "./cedfile.h"
+#include "./commandline.h"
+#include "filehandler.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -85,56 +87,6 @@ void quit(Editor* editor) {
     editor->running = 0;
 }
 
-void handle_command(Editor* editor) {
-    attron(A_REVERSE);
-
-    int x = LINE_NUMBERS_WIDTH; /* start cursor x position */
-
-    mvprintw(LINES - 1, x, "%*s", COLS, " "); /* add negative line */
-    mvaddstr(LINES - 1, x, ":"); /* add command start */
-
-    int ch = getch();
-    /*while (ch != 'q') { ch = getch(); }
-        mvaddstr(LINES - 1, 6, "q");
-        int ch2 = getch();
-        while (ch2 != KEY_ENTER && ch2 != '\n') { ch2 = getch(); }
-        quit(editor);*/
-
-    char command_buffer[256];
-    int buffer_index = 0;
-
-    while (ch != KEY_ENTER && ch != '\n') {
-        ch = getch();
-        /* exit command mode when pressing ESC */
-        if (ch == 27) {
-            clrtoeol();
-            return;
-        }
-
-        if (isprint(ch) && buffer_index < sizeof(command_buffer) - 1) {
-            command_buffer[buffer_index++] = ch;
-            command_buffer[buffer_index] = '\0';
-
-            mvprintw(LINES - 1, x + 1 + buffer_index, "%c", ch);
-            refresh();
-        }
-    }
-
-    if (strcmp(command_buffer, "q") == 0) {
-        quit(editor);
-    } else {
-        mvprintw(LINES - 1, LINE_NUMBERS_WIDTH,
-                 "Command Not Found: %s", command_buffer);
-        ch = getch();
-        if (ch == 27) {
-            clrtoeol();
-            return;
-        }
-    }
-
-    attroff(A_REVERSE);
-}  /* handle_command */
-
 void move_left(Editor* editor) {
     if (editor->curx > 5) {
         editor->curx--;
@@ -144,7 +96,7 @@ void move_left(Editor* editor) {
 }  /* move_left */
 
 void move_right(Editor* editor) {
-        if (editor->curx < COLS - 1) {
+        if (editor->curx < COLS - 1 && editor->curx < strlen(editor->file->text[editor->cury].line) - 5) {
             editor->curx++;
         } else if (editor->curx + editor->x_offset < COLS) {
             editor->x_offset++;
@@ -152,29 +104,31 @@ void move_right(Editor* editor) {
 }  /* move_right */
 
 void move_down(Editor* editor) {
-        int y_abs = editor->cury + editor->y_offset;
+        //int y_abs = editor->cury + editor->y_offset;
+        int y_abs = editor->cury;
 
-        if (editor->cury < LINES - 1 && editor->cury < editor->file->numlines) {
+        if (editor->cury < LINES - 1 && editor->cury < editor->file->numlines - 1) {
             editor->cury++;
         } else if (y_abs < editor->file->numlines - 1) {
             editor->y_offset++;
         }
 
-        if (editor->curx > strlen(editor->file->text[y_abs].line) + 1) {
-            editor->curx = strlen(editor->file->text[y_abs].line) + 1;
+        if (editor->curx > strlen(editor->file->text[y_abs].line) - 5) {
+            editor->curx = strlen(editor->file->text[y_abs].line) - 5;
         }
 }  /* move_down */
 
 void move_up(Editor* editor) {
-        int y_abs = editor->cury + editor->y_offset;
+        //int y_abs = editor->cury + editor->y_offset;
+        int y_abs = editor->cury;
 
         if (editor->cury > 1) {
             editor->cury--;
         } else if (editor->y_offset > 0) {
             editor->y_offset--;
         }
-        if (editor->curx > strlen(editor->file->text[y_abs].line + 1)) {
-            editor->curx = strlen(editor->file->text[y_abs].line) + 1;
+        if (editor->curx > strlen(editor->file->text[y_abs].line + 5)) {
+            editor->curx = strlen(editor->file->text[y_abs].line) + 5;
         }
 }  /* move_up */
 
@@ -183,52 +137,53 @@ void set_mode(Editor* editor, int mode) {
     editor->titlebar->mode = mode;
 }  /* set_mode */
 
+void handle_g(Editor* editor) {
+    int next_ch = getch();
+    while (next_ch != 'g') {next_ch = getch();}
+    editor->cury = 1;
+    editor->curx = 5;
+    editor->y_offset = 0;
+    move(editor->cury, editor->curx);
+}
+
+void handle_d(Editor* editor) {
+    int next_ch = getch();
+    while (next_ch != 'd' && next_ch != 'w') {next_ch = getch();}
+    if(next_ch == 'd') {  /* dd - delete line */
+        remove_line(editor->file, editor->cury - 1);
+    }
+    if(next_ch == 'w') {  /* dw - delete word */
+        remove_word(&editor->file->text[editor->cury - 1], editor->curx - 5);
+    }
+    // move_up(editor);
+}
+
+void move_to_bottom(Editor* editor) {
+    if (editor->file->numlines <= LINES - 2) {
+        editor->cury = editor->file->numlines; 
+    } else {
+        editor->y_offset = editor->file->numlines - LINES;
+        editor->cury = LINES - 1;
+    }
+    editor->curx = 5;
+}
+
 /* Update function used when in NORMAL mode */
 void update_normal(Editor* editor) {
     char lastchar = getch();
-
-    int prev_ch = 0;
-    int timeout = 50;
 
     switch (lastchar) {
         case 'h': move_left(editor); break;
         case 'l': move_right(editor); break;
         case 'j': move_down(editor); break;
+        case 'x': remove_char(&editor->file->text[editor->cury - 1], editor->curx - 5); break;
         case 'k': move_up(editor); break;
         case 'i': set_mode(editor, 1);
+        case 'g': handle_g(editor); break;
+        case 'd': handle_d(editor); break;
+        case ':': handle_command(editor); break;
+        case 'G': move_to_bottom(editor); break; 
     }
-
-    if (editor->curx < 5) editor->curx = 5;
-    if (editor->cury < 1) editor->cury = 1;
-
-    if (lastchar == 'g') {
-        int next_ch = getch();
-        while (next_ch != 'g') {next_ch = getch();}
-            editor->cury = 1;
-            editor->curx = 5;
-            editor->y_offset = 0;
-            move(editor->cury, editor->curx);
-    }
-
-    if (lastchar == ':') {
-        handle_command(editor);
-    }
-
-    if (lastchar == 'G') {
-        editor->y_offset = editor->file->numlines - LINES;
-        editor->cury = LINES;
-        editor->curx = 5;
-        // move(editor->cury, editor->curx);
-    }
-
-    /*if (lastchar == 'a' || lastchar == 127 || lastchar == KEY_BACKSPACE) {
-        if (strlen(editor->file->text[editor->cury + editor->y_offset].line) == 0) {
-            remove_line(editor->file, editor->cury + editor->y_offset);
-        } else if (editor->curx > 1) {
-            // remove_char(editor->file->text[editor->cury + editor->y_offset], editor->curx - 2);
-        }
-        print_file(editor->file, 0 + editor->y_offset, LINES + editor->y_offset, editor->x_offset, editor->y_offset);
-    }*/
 }  /* update_normal */
 
 /* Update function usen when in INSERT mode */
@@ -239,7 +194,7 @@ void update_insert(Editor* editor) {
     }
     if (ch != 27) {
         printw("%c", ch);
-        move(editor->cury, editor->curx + 1);
+        move_right(editor);
     }
 }  /* update_insert */
 
@@ -258,9 +213,9 @@ void render(Editor* editor) {
         static int last_y_offset = -1;
         static int last_mode = -1;
 
-        if (last_y_offset != editor->y_offset ||
+        /*if (last_y_offset != editor->y_offset ||
             last_x_offset != editor->x_offset ||
-            last_mode     != editor-> mode) {
+            last_mode     != editor-> mode) {*/
             attron(A_REVERSE);
             editor->titlebar->columns = COLS;
             render_titlebar(editor->titlebar);
@@ -280,7 +235,7 @@ void render(Editor* editor) {
         last_y_offset = editor->y_offset;
         last_x_offset = editor->x_offset;
         last_mode = editor->mode;
-        }
+        //}
         move(editor->cury, editor->curx);
         refresh();
 }  /* render */

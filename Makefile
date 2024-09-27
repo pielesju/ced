@@ -10,4 +10,4 @@ $(TARGET): $(SRCS)
 	$(CC) -o $(TARGET) $(SRCS) $(CFLAGS)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) && bash

@@ -19,9 +19,9 @@
 #define SRC_EDITOR_H_
 
 #include <ncurses.h>
-#include "cedfile.h"
-#include "cedline.h"
-#include "titlebar.h"
+#include "./cedfile.h"
+#include "./cedline.h"
+#include "./titlebar.h"
 
 typedef struct {
     int mode; /* 0=NORMAL, 1=INSERT */
@@ -37,5 +37,6 @@ typedef struct {
 
 Editor* new_Editor(CED_FILE* file);  /* CONSTRUCTOR */
 int run_editor(Editor* editor);
+void quit(Editor* editor);
 
 #endif  /* SRC_EDITOR_H_ */

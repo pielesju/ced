@@ -20,9 +20,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
-#include "editor.h"
-#include "editor_configuration.h"
-#include "filehandler.h"
+#include "./editor.h"
+#include "./editor_configuration.h"
+#include "./filehandler.h"
 
 int main(int argc, char** argv) {
     CED_FILE* file = malloc(sizeof(CED_FILE));
