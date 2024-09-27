@@ -1,4 +1,4 @@
-# CED (Code EDitor)
+# C'ED (Code EDitor)
 The CED (Code EDitor) is a vim like text editor written in c with ncurses
 
 ![demo screenshot 0](https://github.com/pielesju/ced/blob/master/resources/screenshot0.png)
@@ -43,7 +43,8 @@ $ ced [filename]
 
 the NORMAL mode is the default
 
-i switch to INSERT MODE
+```
+i switch to INSERT mode
 h move left
 j move down
 k move up
@@ -54,14 +55,17 @@ dd remove line
 dw remove word
 x remove character
 : open commandline
+```
 
 #### COMMAND mode
 
-the COMMAND mode ist accessed by pressing : in normal mode
+the COMMAND mode is accessed by pressing : in normal mode
 
+```
 q quit
 w write
 wq write and quit
+```
 
 #### INSERT mode
 
