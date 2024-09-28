@@ -52,7 +52,7 @@ void handle_command(Editor* editor) {
             command_buffer[buffer_index++] = ch;
             command_buffer[buffer_index] = '\0';
 
-            mvprintw(LINES - 1, x + 1 + buffer_index, "%c", ch);
+            mvprintw(LINES - 1, x + buffer_index, "%c", ch);
             refresh();
         }
     }

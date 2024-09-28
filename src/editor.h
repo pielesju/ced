@@ -28,6 +28,7 @@ typedef struct {
     char* filename;
     CED_FILE* file;
     Titlebar* titlebar;
+    char* snipboard;
     int curx;
     int cury;
     int x_offset;

@@ -33,6 +33,7 @@ Editor* new_Editor(CED_FILE* file) {
     Editor* editor = malloc(sizeof(Editor));
     editor->file = file;
     editor->filename = file->filename;
+    editor->snipboard = malloc(sizeof(char));
     editor->mode = 0;
     editor->curx = LINE_NUMBERS_EN * LINE_NUMBERS_WIDTH;
     editor->cury = TITLE_BAR_ENABLED;
@@ -46,6 +47,7 @@ Editor* new_Editor(CED_FILE* file) {
 void delete_Editor(Editor* editor) {
     endwin();
     free(editor->titlebar);
+    free(editor->snipboard);
 }  /* delete_Editor */
 
 /* initialize ncurses screen */
@@ -144,18 +146,27 @@ void handle_g(Editor* editor) {
     editor->curx = 5;
     editor->y_offset = 0;
     move(editor->cury, editor->curx);
-}
+}  /* handle_g */
 
 void handle_d(Editor* editor) {
     int next_ch = getch();
     while (next_ch != 'd' && next_ch != 'w') {next_ch = getch();}
     if(next_ch == 'd') {  /* dd - delete line */
+	strcpy(editor->snipboard, editor->file->text[editor->cury - 1].line );
         remove_line(editor->file, editor->cury - 1);
     }
     if(next_ch == 'w') {  /* dw - delete word */
         remove_word(&editor->file->text[editor->cury - 1], editor->curx - 5);
     }
     // move_up(editor);
+}  /* handle_d */
+
+void handle_y(Editor* editor) {
+    int next_ch = getch();
+    while (next_ch != 'y') {next_ch = getch();}
+    if(next_ch == 'y') { /* yy - copy (yank) line */
+        strcpy(editor->snipboard, editor->file->text[editor->cury - 1].line);
+    }    
 }
 
 void move_to_bottom(Editor* editor) {
@@ -166,7 +177,13 @@ void move_to_bottom(Editor* editor) {
         editor->cury = LINES - 1;
     }
     editor->curx = 5;
-}
+}  /* move_to_bottom */
+
+void insert(Editor* editor) {
+	insert_line(editor->file, editor->cury);
+	printw("%s", editor->snipboard);
+	strcpy(editor->file->text[editor->cury].line, editor->snipboard);
+}  /* insert */
 
 /* Update function used when in NORMAL mode */
 void update_normal(Editor* editor) {
@@ -177,25 +194,44 @@ void update_normal(Editor* editor) {
         case 'l': move_right(editor); break;
         case 'j': move_down(editor); break;
         case 'x': remove_char(&editor->file->text[editor->cury - 1], editor->curx - 5); break;
+	case 'p': insert(editor); break;
         case 'k': move_up(editor); break;
-        case 'i': set_mode(editor, 1);
+        case 'i': set_mode(editor, 1); break;
         case 'g': handle_g(editor); break;
         case 'd': handle_d(editor); break;
+	case 'y': handle_y(editor); break;
         case ':': handle_command(editor); break;
         case 'G': move_to_bottom(editor); break; 
     }
 }  /* update_normal */
 
+void backspace(Editor* editor) {
+	if(editor->curx > 4) {
+	    remove_char(&editor->file->text[editor->cury - 1], editor->curx - 6); move_left(editor);
+	} else {
+	    printw("adjaoiwjw");
+	    remove_line(editor->file, editor->cury - 1);
+	    editor->cury--;
+	    editor->curx = strlen(editor->file->text[editor->cury].line) + 5;
+	}
+}
+
 /* Update function usen when in INSERT mode */
 void update_insert(Editor* editor) {
-    int ch = getch();
-    if (ch == 27) { /* ESC_KEY */
+    int lastchar = getch();
+
+    switch(lastchar) {
+	case 27: set_mode(editor, 0); break;
+	case KEY_BACKSPACE: backspace(editor); break;
+	default: insert_char(&editor->file->text[editor->cury - 1], lastchar, editor->curx - 5); break;
+    }
+    /*if (ch == 27) {  ESC_KEY 
         set_mode(editor, 0);
     }
     if (ch != 27) {
         printw("%c", ch);
         move_right(editor);
-    }
+    }*/
 }  /* update_insert */
 
 void update(Editor* editor) {
