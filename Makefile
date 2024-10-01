@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -pedantic -lncurses
+CFLAGS = -Wall -Wextra -Werror -pedantic -lncurses
 
 TARGET = ced
 SRCS = $(wildcard src/*.c)
@@ -10,7 +10,7 @@ $(TARGET): $(SRCS)
 	$(CC) -o $(TARGET) $(SRCS) $(CFLAGS)
 
 clean:
-	rm -f $(TARGET) && bash
+	rm -f $(TARGET)
 
 lint:
 	cpplint src/*

@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "./commandline.h"
-#include "./editor.h"
-#include "./filehandler.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include "ced/commandline.h"
+#include "ced/editor.h"
+#include "ced/filehandler.h"
 
 void quit_command(Editor* editor) {
     editor->mode = 0;
@@ -38,7 +38,7 @@ void handle_command(Editor* editor) {
     int ch = getch();
 
     char command_buffer[256];
-    int buffer_index = 0;
+    size_t buffer_index = 0;
 
     while (ch != KEY_ENTER && ch != '\n') {
         ch = getch();
@@ -59,7 +59,7 @@ void handle_command(Editor* editor) {
 
     if (strcmp(command_buffer, "q") == 0) {
         quit(editor);
-    } else if(strcmp(command_buffer, "wq") == 0) {
+    } else if (strcmp(command_buffer, "wq") == 0) {
         save_file(editor->file);
     } else {
         mvprintw(LINES - 1, 5,

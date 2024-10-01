@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "./cedfile.h"
+#include "ced/cedfile.h"
 
 void init_file(CED_FILE *p, char *filename, int size) {
     p->text = malloc(size * sizeof(LINE));
@@ -83,14 +83,13 @@ void expand_file(CED_FILE *p) {
 }  /* expand_file */
 
 void print_file(const CED_FILE* file, int start, int end,
-                int x_offset, int y_offset) {
-    int line = 0;
-
+                int x_offset) {
     for (int i = start, line = 0; i < file->numlines && i < end; i++, line++) {
-        int start_pos = 5;
         clrtoeol();
         int linelength = strlen(file->text[i].line);
-        int max_length = linelength - x_offset < COLS - 6 ? linelength - x_offset : COLS - 6;
+        int max_length = linelength - x_offset < COLS - 6 ?
+                         linelength - x_offset :
+                         COLS - 6;
         char hline[linelength + 1 * 2];
 
         for (int j = x_offset; j < linelength && j < x_offset + COLS - 6; j++) {

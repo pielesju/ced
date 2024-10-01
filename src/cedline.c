@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "./cedline.h"
+#include "ced/cedline.h"
 
 void init_line(LINE* s) {
     s->size = LINE_SIZE;
@@ -23,34 +23,34 @@ void init_line(LINE* s) {
     s->line[0] = '\0';
 }  /* init_line */
 
-void insert_char(LINE* s, char c, int index) {
+void insert_char(LINE* s, char c, size_t index) {
     if (strlen(s->line) >= s->size - 2) {
         expand(s);
     }
 
-    for (int i = strlen(s->line); i >= index; i--) {
+    for (size_t i = strlen(s->line); i >= index; i--) {
         s->line[i + 1] = s->line[i];
     }
 
     s->line[index] = c;
 }  /* insert_char */
 
-void remove_char(LINE* s, int index) {
-    for (int i = index; i < strlen(s->line); i++) {
+void remove_char(LINE* s, size_t index) {
+    for (size_t i = index; i < strlen(s->line); i++) {
         s->line[i] = s->line[i + 1];
     }
 }  /* remove_char */
 
-void remove_word(LINE* s, int index) {
-    int i = index;
-    while(s->line[i] != ' ') {
+void remove_word(LINE* s, size_t index) {
+    size_t i = index;
+    while (s->line[i] != ' ') {
         remove_char(s, i);
         i++;
     }
 }  /* remove_word */
 
 void expand(LINE *s) {
-    int new_size = s->size * 2;
+    size_t new_size = s->size * 2;
     char* temp = malloc(new_size * sizeof(char));
     strcpy(temp, s->line);
     free(s->line);
