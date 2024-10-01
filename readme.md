@@ -7,7 +7,9 @@ This is a personal learning project.
 
 ## Requirements
 
-**ncurses**\
+- **gcc**
+- **ncurses**
+
 How to install ncurses:
 ```bash
 # gnu debian
@@ -49,7 +51,6 @@ make lint
 $ ced
 # open with file
 $ ced [filename]
-# help
 ```
 
 ### Modes
