@@ -12,6 +12,12 @@ How to install:
 sudo apt-get install libncurses5-dev libncursesw5-dev
 # archlinux
 sudo pacman -S ncurses
+
+# (optional) add linting support for make lint
+# gnu debian
+sudo apt install cpplint
+# archlinux
+sudo pacman -S cpplint
 ```
 
 ## Build
@@ -26,6 +32,12 @@ make
 
 ```
 make clean
+```
+
+### Lint
+
+```
+make lint
 ```
 
 ## Usage
